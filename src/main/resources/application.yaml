@@ -7,3 +7,26 @@ spring:
     password: JXWF7ikt2nSRReKg
     driver-class-name: com.mysql.cj.jdbc.Driver
 #    driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
+
+
+# App config
+app:
+  jwt:
+    auth-secret: 65230cc35d4bcebcda389440296df7c2599037680d84a3047831e3e28dcb08902edbb5bf7051687c89fa7f3820161ee21f424042605c46a8abaf7d3947483ac6
+    auth-expiration-ms: 14400000                                          # 4 hours
+    refresh-secret: c1a0cc4a32134ef30bf00951ef9d260e79de196e5c12134a6997f5f46515f47b285fd9d3439d0fa649376d619dd2838c90253690610496d3fcf57a3c7954ca27
+    refresh-expiration-ms: 86400000                                 # 24 hours
+
+logging:
+  level:
+    org.springframework.security: DEBUG
+    com.jacent.storefront: DEBUG
+
+# SpringDoc / Swagger UI
+springdoc:
+  swagger-ui:
+    path: /swagger-ui.html
+    operations-sorter: method
+    tags-sorter: alpha
+    try-it-out-enabled: true
+    filter: true
