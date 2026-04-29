@@ -1,0 +1,7 @@
+order:
+  queries:
+    orderByOrderId: SELECT * FROM orders WHERE order_id = ?
+    orderItemsByOrderId: SELECT * FROM order_items WHERE order_id = ?
+    ordersByUserId: SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC
+    createOrder: INSERT INTO orders (user_id, status) VALUES (?, ?)
+    addItemToOrder: INSERT INTO order_items (order_id, product_id, quantity, unit_price, retail_price) VALUES (?, ?, ?, ?,?)
