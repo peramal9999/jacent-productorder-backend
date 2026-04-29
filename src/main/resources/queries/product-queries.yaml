@@ -1,4 +1,21 @@
 product:
   queries:
-    productCount: SELECT COUNT(*) FROM products
-    allProducts: SELECT product_id, product_name, category, division, upc_code, sale_unit, price, retail_price, note FROM products LIMIT ? OFFSET ?
+    productCount: SELECT COUNT(*) from VW_AUTHORIZED_PRODUCT_CATALOG
+    allProducts: |
+      SELECT
+      	MVID,
+      	DIVISION_NAME_ID as divisionId,
+      	DIVISION as division,
+      	DIVNAME,
+      	COMMODITY,
+      	UPC_CODE,
+      	UPC,
+      	ITEM_ID as product_id,
+      	ITEM_EXTID as product_ext_id,
+      	ITEM_NAME as product_name,
+      	ITEM_DESC,
+      	PRICE,
+      	RETAIL_PRICE,
+      	RANK,
+      	ORDER_RANK
+      FROM VW_AUTHORIZED_PRODUCT_CATALOG  LIMIT ? OFFSET ?

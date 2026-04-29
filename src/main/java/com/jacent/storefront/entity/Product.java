@@ -13,12 +13,19 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 public class Product {
     private Integer productId;
+    private String productExtId;
     private String productName;
-    private String category;
+    private String productDesc;
+    private String commodity;
     private String division;
+    private String divisionId;
+    private String divName;
     private String upcCode;
+    private String upc;
     private String saleUnit;
     private BigDecimal price;
     private BigDecimal retailPrice;
-    private String note;
+    private String mvid;
+    private String rank;
+    private String orderRank;
 }

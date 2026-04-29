@@ -25,7 +25,7 @@ public class ConfigurationServiceImpl implements ConfigurationService {
 
     @PostConstruct
     public void load() {
-        configs = appConfigRepository.findAll();
+//        configs = appConfigRepository.findAll();
         log.info("Loaded {} app configs from DB", configs.size());
     }
 
