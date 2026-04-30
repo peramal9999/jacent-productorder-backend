@@ -13,6 +13,8 @@ import org.springframework.context.annotation.PropertySource;
 @Data
 public class ItemQueries {
 
+    private String divisions;
+    private String commodities;
     private String itemCount;
     private String allItems;
 }

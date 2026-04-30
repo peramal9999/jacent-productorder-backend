@@ -1,16 +1,16 @@
 spring:
   application:
     name: storefront
-  datasource:
-    url: jdbc:mysql://localhost:3306/storefront?useSSL=false&serverTimezone=UTC
-    username: root
-    password: JXWF7ikt2nSRReKg
-    driver-class-name: com.mysql.cj.jdbc.Driver
 #  datasource:
-#    url: ${SNOWFLAKE_DATABASE_URL}
-#    username: ${SNOWFLAKE_USERNAME}
-#    password: ${SNOWFLAKE_PASSWORD}
-#    driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
+#    url: jdbc:mysql://localhost:3306/storefront?useSSL=false&serverTimezone=UTC
+#    username: root
+#    password: JXWF7ikt2nSRReKg
+#    driver-class-name: com.mysql.cj.jdbc.Driver
+  datasource:
+    url: ${SNOWFLAKE_DATABASE_URL}
+    username: ${SNOWFLAKE_USERNAME}
+    password: ${SNOWFLAKE_PASSWORD}
+    driver-class-name: net.snowflake.client.jdbc.SnowflakeDriver
 
     hikari:
       connection-timeout: 60000

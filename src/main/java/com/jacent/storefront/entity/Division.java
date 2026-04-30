@@ -4,7 +4,7 @@ import lombok.Data;
 
 @Data
 public class Division {
-    private int divisionId;
+    private int divisionNameId;
     private String division;
-    private String divisionCode;
+    private String divname;
 }

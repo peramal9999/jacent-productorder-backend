@@ -30,7 +30,7 @@ dependencies {
 	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.12.6'
 	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.12.6'
 	// MySQL Connector
-	runtimeOnly 'com.mysql:mysql-connector-j'
+//	runtimeOnly 'com.mysql:mysql-connector-j'
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
 	testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
