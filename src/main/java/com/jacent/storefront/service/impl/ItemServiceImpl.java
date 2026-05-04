@@ -11,9 +11,15 @@ import com.jacent.storefront.repository.ItemRepository;
 import com.jacent.storefront.service.ConfigurationService;
 import com.jacent.storefront.service.ItemService;
 import lombok.extern.slf4j.Slf4j;
+import org.opensearch.client.opensearch.OpenSearchClient;
+import org.opensearch.client.opensearch._types.FieldValue;
+import org.opensearch.client.opensearch.core.SearchResponse;
+import org.opensearch.client.opensearch.core.search.Hit;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -23,12 +29,14 @@ public class ItemServiceImpl implements ItemService {
     private final ItemRepository itemRepository;
     private final DivisionRepository divisionRepository;
     private final CommodityRepository commodityRepository;
+    private final OpenSearchService openSearchService;
 
-    ItemServiceImpl(ItemRepository itemRepository, ConfigurationService configurationService, DivisionRepository divisionRepository, CommodityRepository commodityRepository) {
+    ItemServiceImpl(ItemRepository itemRepository, ConfigurationService configurationService, DivisionRepository divisionRepository, CommodityRepository commodityRepository, , OpenSearchService openSearchService) {
         this.itemRepository = itemRepository;
         this.configurationService = configurationService;
         this.divisionRepository = divisionRepository;
         this.commodityRepository = commodityRepository;
+        this.openSearchService = openSearchService;
     }
 
     @Override
@@ -58,5 +66,10 @@ public class ItemServiceImpl implements ItemService {
                 .totalElements(total)
                 .totalPages((int) Math.ceil((double) total / pageSize))
                 .build();
+    }
+
+    @Override
+    public List<Product> searchProducts(String searchString) throws IOException {
+        return openSearchService.searchProducts(searchString);
     }
 }

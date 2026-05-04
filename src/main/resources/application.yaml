@@ -43,3 +43,11 @@ springdoc:
     tags-sorter: alpha
     try-it-out-enabled: true
     filter: true
+
+
+opensearch:
+  host: localhost
+  port: 9200
+  scheme: http
+  username: admin
+  password: ${OPENSEARCH_INITIAL_ADMIN_PASSWORD}
