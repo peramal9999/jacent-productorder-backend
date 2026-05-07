@@ -1,8 +1,12 @@
 package com.jacent.storefront.repository;
 
 import com.jacent.storefront.entity.User;
+import com.jacent.storefront.exception.ResourceCreationException;
 import com.jacent.storefront.query.UserQueries;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.jdbc.BadSqlGrammarException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -13,6 +17,7 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
 
+@Slf4j
 @Repository
 public class UserRepository {
 
@@ -24,13 +29,18 @@ public class UserRepository {
 
     public boolean existsByEmail(String email) {
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("email", email);
-        Boolean exists = namedParameterJdbcTemplate.queryForObject(
-                userQueries.getEmailExists(),
-                params,
-                Boolean.class
-        );
-        return Boolean.TRUE.equals(exists);
+        params.addValue("email", email.trim().toLowerCase());
+
+        try {
+            Integer count = namedParameterJdbcTemplate.queryForObject(
+                    userQueries.getEmailExists(),
+                    params,
+                    Integer.class
+            );
+            return count != null && count > 0;
+        } catch (EmptyResultDataAccessException e) {
+            return false;
+        }
     }
 
     public User findByEmail(String email) {
@@ -48,28 +58,43 @@ public class UserRepository {
     }
 
     public User createUser(User user) {
+        log.info("Creating new user with email: {}", user.getEmail());
         KeyHolder keyHolder = new GeneratedKeyHolder();
         MapSqlParameterSource params = new MapSqlParameterSource();
-        params.addValue("firstName", user.getFirstName());
-        params.addValue("lastName", user.getLastName());
-        params.addValue("email", user.getEmail());
+        params.addValue("firstName", user.getFirstName().trim());
+        params.addValue("lastName", user.getLastName().trim());
+        params.addValue("email", user.getEmail().toLowerCase().trim());
         params.addValue("password", user.getPassword());
         params.addValue("storeId", user.getStoreId());
         params.addValue("isEnabled", user.isEnabled());
         params.addValue("isLocked", user.isLocked());
 
-        namedParameterJdbcTemplate.update(
-                userQueries.getCreateUser(),
-                params,
-                keyHolder
-        );
-
+        try {
+            namedParameterJdbcTemplate.update(
+                    userQueries.getCreateUser(),
+                    params,
+                    keyHolder
+            );
+        } catch (DataIntegrityViolationException e) {
+            log.warn("User creation failed - duplicate email: {}", user.getEmail());
+            throw new ResourceCreationException("User with this email already exists", e);
+        } catch (BadSqlGrammarException e) {
+            log.error("User creation failed - SQL error", e);
+            throw new ResourceCreationException("Invalid user data provided", e);
+        } catch (Exception e) {
+            log.error("User creation failed for email: {}", user.getEmail(), e);
+            throw new ResourceCreationException("Failed to create user", e);
+        }
         Number generatedId = keyHolder.getKey();
         if (generatedId == null) {
-            throw new RuntimeException("Failed to retrieve generated user ID");
+            log.error("Failed to retrieve generated user ID");
+            throw new ResourceCreationException("Failed to retrieve generated user ID");
         }
 
-        user.setUserId(generatedId.intValue());
+        int userId = generatedId.intValue();
+        user.setUserId(userId);
+        log.info("User created successfully with ID: {} and email: {}", userId, user.getEmail());
+
         return user;
     }
 

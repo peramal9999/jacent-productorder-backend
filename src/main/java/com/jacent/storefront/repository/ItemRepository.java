@@ -1,8 +1,12 @@
 package com.jacent.storefront.repository;
 
+import com.jacent.storefront.exception.ResourceRetrievalException;
 import com.jacent.storefront.query.ItemQueries;
 import com.jacent.storefront.entity.Item;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
@@ -10,38 +14,64 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+@Slf4j
 @Repository
 public class ItemRepository {
 
     @Autowired
     NamedParameterJdbcTemplate namedParameterJdbcTemplate;
 
+    private static final BeanPropertyRowMapper<Item> ITEM_ROW_MAPPER =
+            new BeanPropertyRowMapper<>(Item.class);
+
     @Autowired
     ItemQueries itemQueries;
 
     public List<Item> getAllItemsPagination(int page, int size, Integer storeId) {
-        int offset = page * size;
+        log.debug("Fetching items for store: {} - page: {}, size: {}", storeId, page, size);
+
+        long offset = (long) page * size;
 
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("storeId", storeId);
         params.addValue("size", size);
-        params.addValue("offset", offset);
+        params.addValue("offset", (int) offset);
 
-        return namedParameterJdbcTemplate.query(
-                itemQueries.getAllItemsByStoreId(),
-                params,
-                new BeanPropertyRowMapper<>(Item.class)
-        );
+        try {
+            List<Item> items = namedParameterJdbcTemplate.query(
+                    itemQueries.getAllItemsByStoreId(),
+                    params,
+                    ITEM_ROW_MAPPER
+            );
+            log.debug("Retrieved {} items for store: {}", items.size(), storeId);
+            return items;
+        } catch (DataAccessException e) {
+            log.error("Failed to retrieve items for store: {}", storeId, e);
+            throw new ResourceRetrievalException("Failed to retrieve items", e);
+        }
     }
 
     public int getTotalItemsCount(Integer storeId) {
+        log.debug("Fetching total item count for store: {}", storeId);
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("storeId", storeId);
-        return namedParameterJdbcTemplate.queryForObject(
-                itemQueries.getItemCountByStoreId(),
-                params,
-                Integer.class
-        );
+
+        try {
+            Integer count = namedParameterJdbcTemplate.queryForObject(
+                    itemQueries.getItemCountByStoreId(),
+                    params,
+                    Integer.class
+            );
+            int result = count != null ? count : 0;
+            log.debug("Total item count for store {} is: {}", storeId, result);
+            return result;
+        } catch (EmptyResultDataAccessException e) {
+            log.debug("No items found for store: {}", storeId);
+            return 0;
+        } catch (DataAccessException e) {
+            log.error("Failed to retrieve item count for store: {}", storeId, e);
+            throw new ResourceRetrievalException("Failed to retrieve item count", e);
+        }
     }
 
     public List<Item> searchItemsByStoreIdAndSearchKeyword(Integer storeId, String keyword, Integer pageSize) {
@@ -50,10 +80,17 @@ public class ItemRepository {
         params.addValue("search", "%" + keyword + "%");
         params.addValue("size", pageSize);
 
-        return namedParameterJdbcTemplate.query(
-                itemQueries.getSearchItemsByStoreIdAndSearchKeyword(),
-                params,
-                new BeanPropertyRowMapper<>(Item.class)
-        );
+        try {
+            List<Item> items = namedParameterJdbcTemplate.query(
+                    itemQueries.getSearchItemsByStoreIdAndSearchKeyword(),
+                    params,
+                    ITEM_ROW_MAPPER
+            );
+            log.debug("Search returned {} items for keyword: {}", items.size(), keyword);
+            return items;
+        } catch (DataAccessException e) {
+            log.error("Search failed for keyword: {} in store: {}", keyword, storeId, e);
+            throw new ResourceRetrievalException("Search operation failed", e);
+        }
     }
 }

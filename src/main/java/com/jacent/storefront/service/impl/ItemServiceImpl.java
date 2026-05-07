@@ -13,9 +13,9 @@ import com.jacent.storefront.service.OpenSearchService;
 import com.jacent.storefront.utils.SecurityUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
@@ -57,15 +57,16 @@ public class ItemServiceImpl implements ItemService {
     }
 
     @Override
-    public List<Item> searchItems(String searchString) throws IOException {
+    public List<Item> searchItems(String searchKeyword) throws IOException {
         boolean enableFullTextOpenSearch = configurationService.getValueAsBoolean(Configuration.ENABLE_FULL_TEXT_OPEN_SEARCH, false);
-        if(enableFullTextOpenSearch){
-            return openSearchService.searchItems(searchString);
+        if(enableFullTextOpenSearch && !StringUtils.isEmpty(searchKeyword)){
+            return openSearchService.searchItems(searchKeyword.trim());
         } else {
             // Search from DB
+            String escapedKeyword = escapeSearchKeyword(searchKeyword.trim());
             User user = SecurityUtils.getCurrentUser();
             Integer pageSize = configurationService.getValueAsInteger(Configuration.PAGINATION_SIZE, 25);
-            return itemRepository.searchItemsByStoreIdAndSearchKeyword(user.getStoreId(), searchString, pageSize);
+            return itemRepository.searchItemsByStoreIdAndSearchKeyword(user.getStoreId(), escapedKeyword, pageSize);
         }
     }
 
@@ -95,5 +96,12 @@ public class ItemServiceImpl implements ItemService {
                 .commodities(commodities)
                 .build();
         return filterOptions;
+    }
+
+    private String escapeSearchKeyword(String keyword) {
+        return keyword
+                .replace("\\", "\\\\")
+                .replace("%", "\\%")
+                .replace("_", "\\_");
     }
 }
