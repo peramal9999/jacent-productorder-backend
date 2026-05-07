@@ -1,5 +1,7 @@
 item:
   queries:
+    divisions: SELECT DIVISION_NAME_ID, DIVISION, DIVNAME FROM division ORDER BY DIVISION_NAME_ID
+    commodities: SELECT COMMODITY_ID, COMMODITY FROM commodity
     itemCount: |
             SELECT
               COUNT(*)
@@ -9,8 +11,6 @@ item:
             WHERE
                p.PRODUCT_ID = fsai.ITEM_ID AND
                fsai.STORE_ID = :storeId
-    divisions: SELECT DISTINCT(DIVISION_NAME_ID), DIVISION, DIVNAME FROM VW_AUTHORIZED_PRODUCT_CATALOG ORDER BY DIVISION_NAME_ID
-    commodities: SELECT DISTINCT(COMMODITY) FROM VW_AUTHORIZED_PRODUCT_CATALOG
     allItems: |
       SELECT
       DIVISION_NAME_ID as division,
