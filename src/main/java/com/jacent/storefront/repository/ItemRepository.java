@@ -28,7 +28,7 @@ public class ItemRepository {
         params.addValue("offset", offset);
 
         return namedParameterJdbcTemplate.query(
-                itemQueries.getAllItems(),
+                itemQueries.getAllItemsByStoreId(),
                 params,
                 new BeanPropertyRowMapper<>(Item.class)
         );
@@ -38,9 +38,22 @@ public class ItemRepository {
         MapSqlParameterSource params = new MapSqlParameterSource();
         params.addValue("storeId", storeId);
         return namedParameterJdbcTemplate.queryForObject(
-                itemQueries.getItemCount(),
+                itemQueries.getItemCountByStoreId(),
                 params,
                 Integer.class
+        );
+    }
+
+    public List<Item> searchItemsByStoreIdAndSearchKeyword(Integer storeId, String keyword, Integer pageSize) {
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("storeId", storeId);
+        params.addValue("search", "%" + keyword + "%");
+        params.addValue("size", pageSize);
+
+        return namedParameterJdbcTemplate.query(
+                itemQueries.getSearchItemsByStoreIdAndSearchKeyword(),
+                params,
+                new BeanPropertyRowMapper<>(Item.class)
         );
     }
 }

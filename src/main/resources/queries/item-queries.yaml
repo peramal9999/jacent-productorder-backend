@@ -23,29 +23,51 @@ item:
           c.COMMODITY_ID = fsai.COMMODITY_ID AND 
           fsai.STORE_ID = :storeId
       ORDER BY COMMODITY_ID
-    itemCount: |
+    itemCountByStoreId: |
             SELECT
               COUNT(*)
             FROM 
               fact_store_authorized_items fsai,
-              products p
+              items i
             WHERE
-               p.PRODUCT_ID = fsai.ITEM_ID AND
+               i.ITEM_ID = fsai.ITEM_ID AND
                fsai.STORE_ID = :storeId
-    allItems: |
+    allItemsByStoreId: |
       SELECT
-      DIVISION_NAME_ID as division,
-      COMMODITY_ID as COMMODITY,
-      p.UPC_CODE,
-      p.PRODUCT_ID ITEM_ID,
-      p.PRODUCT_NAME ITEM_NAME,
-      p.PRODUCT_DESC ITEM_DESC,
-      PRICE,
-      RETAIL_PRICE
+        DIVISION_NAME_ID as division,
+        COMMODITY_ID as COMMODITY,
+        i.UPC_CODE,
+        i.ITEM_ID,
+        i.ITEM_NAME,
+        i.ITEM_DESC,
+        PRICE,
+        RETAIL_PRICE
       FROM 
         fact_store_authorized_items fsai,
-        products p
+        items i
       WHERE
-         p.PRODUCT_ID = fsai.ITEM_ID AND
+         i.ITEM_ID = fsai.ITEM_ID AND
          fsai.STORE_ID = :storeId
       LIMIT :size OFFSET :offset
+    searchItemsByStoreIdAndSearchKeyword: |
+      SELECT
+        DIVISION_NAME_ID as division,
+        COMMODITY_ID as COMMODITY,
+        i.UPC_CODE,
+        i.ITEM_ID,
+        i.ITEM_NAME,
+        i.ITEM_DESC,
+        PRICE,
+        RETAIL_PRICE
+      FROM 
+        fact_store_authorized_items fsai,
+        items i
+      WHERE
+         i.ITEM_ID = fsai.ITEM_ID AND
+         fsai.STORE_ID = :storeId AND
+         i.item_name LIKE :search OR 
+         i.item_desc LIKE :search OR 
+         i.upc_code LIKE :search OR 
+         COMMODITY_ID LIKE :search OR 
+         DIVISION_NAME_ID LIKE :search
+      LIMIT :size

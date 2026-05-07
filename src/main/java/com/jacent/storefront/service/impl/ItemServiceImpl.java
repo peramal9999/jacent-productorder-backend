@@ -62,8 +62,10 @@ public class ItemServiceImpl implements ItemService {
         if(enableFullTextOpenSearch){
             return openSearchService.searchItems(searchString);
         } else {
-            // TODO: Search from DB
-            return new ArrayList<>();
+            // Search from DB
+            User user = SecurityUtils.getCurrentUser();
+            Integer pageSize = configurationService.getValueAsInteger(Configuration.PAGINATION_SIZE, 25);
+            return itemRepository.searchItemsByStoreIdAndSearchKeyword(user.getStoreId(), searchString, pageSize);
         }
     }
 

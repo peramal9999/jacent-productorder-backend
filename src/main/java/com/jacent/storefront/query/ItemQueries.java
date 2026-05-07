@@ -15,6 +15,7 @@ public class ItemQueries {
 
     private String divisionsByStoreId;
     private String commoditiesByStoreId;
-    private String itemCount;
-    private String allItems;
+    private String itemCountByStoreId;
+    private String allItemsByStoreId;
+    private String searchItemsByStoreIdAndSearchKeyword;
 }
