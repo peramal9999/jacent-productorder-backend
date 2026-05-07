@@ -1,8 +1,7 @@
 package com.jacent.storefront.controller;
 
+import com.jacent.storefront.dto.response.FilterOptions;
 import com.jacent.storefront.dto.response.ItemsResponse;
-import com.jacent.storefront.entity.Commodity;
-import com.jacent.storefront.entity.Division;
 import com.jacent.storefront.entity.Item;
 import com.jacent.storefront.service.ItemService;
 import org.springframework.http.ResponseEntity;
@@ -24,14 +23,9 @@ public class ItemController {
         this.itemService = itemService;
     }
 
-    @GetMapping("/divisions")
-    public ResponseEntity<List<Division>> getAllDivisions() {
-        return ResponseEntity.ok(itemService.getAllDivisions());
-    }
-
-    @GetMapping("/commodities")
-    public ResponseEntity<List<Commodity>> getAllCommodities() {
-        return ResponseEntity.ok(itemService.getAllCommodities());
+    @GetMapping("/filterOptions")
+    public ResponseEntity<FilterOptions> getFilterOptions() {
+        return ResponseEntity.ok(itemService.getFilterOptions());
     }
 
     @GetMapping("/items")

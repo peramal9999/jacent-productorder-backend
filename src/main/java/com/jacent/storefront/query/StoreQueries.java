@@ -6,15 +6,11 @@ import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.PropertySource;
 
-
 @Configuration
-@ConfigurationProperties(prefix = "item.queries")
-@PropertySource(value = "classpath:queries/item-queries.yaml", factory = YamlPropertySourceFactory.class)
+@ConfigurationProperties(prefix = "store.queries")
+@PropertySource(value = "classpath:queries/store-queries.yaml", factory = YamlPropertySourceFactory.class)
 @Data
-public class ItemQueries {
-
-    private String divisionsByStoreId;
-    private String commoditiesByStoreId;
-    private String itemCount;
-    private String allItems;
+public class StoreQueries {
+    private String storeById;
+    private String locationByLocationId;
 }

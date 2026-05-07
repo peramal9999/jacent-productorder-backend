@@ -1,7 +1,28 @@
 item:
   queries:
-    divisions: SELECT DIVISION_NAME_ID, DIVISION, DIVNAME FROM division ORDER BY DIVISION_NAME_ID
-    commodities: SELECT COMMODITY_ID, COMMODITY FROM commodity
+    divisionsByStoreId: |
+      SELECT 
+      	DISTINCT(d.DIVISION_NAME_ID), 
+          d.DIVISION, 
+          d.DIVNAME
+      FROM 
+      	division d,
+          fact_store_authorized_items fsai
+      WHERE 
+          d.DIVISION_NAME_ID = fsai.DIVISION_NAME_ID AND 
+          fsai.STORE_ID = :storeId
+      ORDER BY DIVISION_NAME_ID
+    commoditiesByStoreId: |
+      SELECT 
+      	DISTINCT(c.COMMODITY_ID), 
+          c.COMMODITY
+      FROM 
+      	commodity c,
+          fact_store_authorized_items fsai
+      WHERE 
+          c.COMMODITY_ID = fsai.COMMODITY_ID AND 
+          fsai.STORE_ID = :storeId
+      ORDER BY COMMODITY_ID
     itemCount: |
             SELECT
               COUNT(*)

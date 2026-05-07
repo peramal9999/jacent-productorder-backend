@@ -1,10 +1,12 @@
 package com.jacent.storefront.service.impl;
 
+import com.jacent.storefront.dto.response.FilterOptions;
 import com.jacent.storefront.dto.response.ItemsResponse;
 import com.jacent.storefront.entity.*;
 import com.jacent.storefront.repository.CommodityRepository;
 import com.jacent.storefront.repository.DivisionRepository;
 import com.jacent.storefront.repository.ItemRepository;
+import com.jacent.storefront.repository.StoreRepository;
 import com.jacent.storefront.service.ConfigurationService;
 import com.jacent.storefront.service.ItemService;
 import com.jacent.storefront.service.OpenSearchService;
@@ -25,23 +27,15 @@ public class ItemServiceImpl implements ItemService {
     private final DivisionRepository divisionRepository;
     private final CommodityRepository commodityRepository;
     private final OpenSearchService openSearchService;
+    private final StoreRepository storeRepository;
 
-    ItemServiceImpl(ItemRepository itemRepository, ConfigurationService configurationService, DivisionRepository divisionRepository, CommodityRepository commodityRepository , OpenSearchService openSearchService) {
+    ItemServiceImpl(ItemRepository itemRepository, ConfigurationService configurationService, DivisionRepository divisionRepository, CommodityRepository commodityRepository , OpenSearchService openSearchService, StoreRepository storeRepository) {
         this.itemRepository = itemRepository;
         this.configurationService = configurationService;
         this.divisionRepository = divisionRepository;
         this.commodityRepository = commodityRepository;
         this.openSearchService = openSearchService;
-    }
-
-    @Override
-    public List<Division> getAllDivisions() {
-        return divisionRepository.findAll();
-    }
-
-    @Override
-    public List<Commodity> getAllCommodities() {
-        return commodityRepository.findAll();
+        this.storeRepository = storeRepository;
     }
 
     @Override
@@ -83,5 +77,21 @@ public class ItemServiceImpl implements ItemService {
         } catch (Exception e){
             log.error("Error occured while bulkIndexProducts");
         }
+    }
+
+    @Override
+    public FilterOptions getFilterOptions() {
+        User user = SecurityUtils.getCurrentUser();
+        Store store = storeRepository.findStoreByStoreId(user.getStoreId());
+        Location location = storeRepository.findLocationByLocationId(store.getLocationId());
+        List<Division> divisions = divisionRepository.findAllDivisionsByStoreId(store.getStoreId());
+        List<Commodity> commodities = commodityRepository.findAllCommoditiesByStoreId(store.getStoreId());
+        FilterOptions filterOptions = FilterOptions.builder()
+                .store(store)
+                .location(location)
+                .divisions(divisions)
+                .commodities(commodities)
+                .build();
+        return filterOptions;
     }
 }
