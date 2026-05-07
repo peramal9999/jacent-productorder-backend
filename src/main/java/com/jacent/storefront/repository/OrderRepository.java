@@ -8,46 +8,48 @@ import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
+import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
 import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
-import java.math.BigDecimal;
-import java.sql.PreparedStatement;
-import java.sql.Statement;
+import java.sql.Timestamp;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Repository
 public class OrderRepository {
 
     private final JdbcTemplate jdbcTemplate;
-
+    private final  NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final OrderQueries orderQueries;
 
-    public OrderRepository(JdbcTemplate jdbcTemplate, OrderQueries orderQueries) {
+    public OrderRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, OrderQueries orderQueries) {
         this.jdbcTemplate = jdbcTemplate;
+        this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.orderQueries = orderQueries;
     }
 
     public int insertOrder(int userId, String status) {
         KeyHolder keyHolder = new GeneratedKeyHolder();
-        try {
-            jdbcTemplate.update(connection -> {
-                PreparedStatement ps = connection.prepareStatement(orderQueries.getCreateOrder(), Statement.RETURN_GENERATED_KEYS);
-                ps.setInt(1, userId);
-                ps.setString(2, status);
-                return ps;
-            }, keyHolder);
 
-            if (keyHolder.getKey() == null) {
-                throw new RuntimeException("Failed to retrieve generated order ID");
-            }
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userId", userId);
+        params.addValue("status", status);
+        params.addValue("orderDate", Timestamp.valueOf(LocalDateTime.now()));
 
-            return keyHolder.getKey().intValue();
+        namedParameterJdbcTemplate.update(
+                orderQueries.getCreateOrder(),
+                params,
+                keyHolder
+        );
 
-        } catch (DataAccessException ex) {
-            throw new RuntimeException("Error inserting order", ex);
+        if (keyHolder.getKey() == null) {
+            throw new RuntimeException("Failed to retrieve generated order ID");
         }
+
+        return keyHolder.getKey().intValue();
     }
 
     public void insertOrderItem(int orderId, OrderItem item) {
@@ -64,11 +66,17 @@ public class OrderRepository {
         }
     }
 
-    public List<Order> findOrdersByUser(int userId) {
+    public List<Order> findOrdersByUser(int userId, LocalDateTime threeMonthsAgo) {
         try {
-            return jdbcTemplate.query(orderQueries.getOrdersByUserId(),
-                    new Object[]{userId},
-                    new BeanPropertyRowMapper<>(Order.class));
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("userId", userId);
+            params.addValue("startDate", Timestamp.valueOf(threeMonthsAgo));
+
+            return namedParameterJdbcTemplate.query(
+                    orderQueries.getOrdersByUserId(),
+                    params,
+                    new BeanPropertyRowMapper<>(Order.class)
+            );
         } catch (DataAccessException ex) {
             throw new RuntimeException("Error fetching orders for userId: " + userId, ex);
         }

@@ -16,6 +16,7 @@ public class Order {
     private int userId;
     private String netsuiteOrderId;
     private String status;
+    private LocalDateTime orderDate;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
