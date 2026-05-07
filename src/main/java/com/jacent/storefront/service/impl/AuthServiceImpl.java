@@ -36,7 +36,7 @@ public class AuthServiceImpl implements AuthService {
     }
 
     @Override
-    public AuthResponse register(RegisterRequest request) {
+    public UserResponse register(RegisterRequest request) {
         if (userRepository.existsByEmail(request.getEmail())) {
             log.warn("Registration failed - email already in use: {}", request.getEmail());
             throw new IllegalArgumentException("Email already in use: " + request.getEmail());
@@ -51,7 +51,7 @@ public class AuthServiceImpl implements AuthService {
                 .build();
         userRepository.createUser(user);
         log.info("New user registered: email={}", request.getEmail());
-        return buildAuthResponse(user);
+        return toUserResponse(user);
     }
 
     @Override
