@@ -45,6 +45,7 @@ public class AuthServiceImpl implements AuthService {
                 .firstName(request.getFirstName())
                 .lastName(request.getLastName())
                 .email(request.getEmail())
+                .storeId(request.getStoreId())
                 .password(passwordEncoder.encode(request.getPassword()))
                 .enabled(true)
                 .build();
@@ -106,6 +107,7 @@ public class AuthServiceImpl implements AuthService {
                 .firstName(user.getFirstName())
                 .lastName(user.getLastName())
                 .email(user.getEmail())
+                .storeId(user.getStoreId())
                 .isActive(user.isEnabled())
                 .createdAt(user.getCreatedAt())
                 .build();

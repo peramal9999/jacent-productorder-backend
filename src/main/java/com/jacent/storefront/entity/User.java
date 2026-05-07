@@ -23,6 +23,7 @@ public class User implements UserDetails {
     private String lastName;
     private String email;
     private String password;
+    private Integer storeId;
     private boolean enabled = true;
     private boolean locked = false;
     private LocalDateTime createdAt;

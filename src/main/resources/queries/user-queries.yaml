@@ -1,7 +1,7 @@
 user:
   queries:
-    userByEmail: SELECT user_id, email, first_name, last_name, password_hash as password, enabled, locked FROM users WHERE email = ?
+    userByEmail: SELECT user_id, email, first_name, last_name, password_hash as password, store_id, enabled, locked FROM users WHERE email = ?
     emailExists: SELECT EXISTS(SELECT 1 FROM users WHERE email = ?)
-    createUser: INSERT INTO users (first_name, last_name, email, password_hash, enabled, locked, created_at, updated_at)
-                  VALUES (?, ?, ?, ?, ?, ?, NOW(), NOW())
+    createUser: INSERT INTO users (first_name, last_name, email, password_hash, store_id, enabled, locked, created_at, updated_at)
+                  VALUES (?, ?, ?, ?, ?, ?, ?, NOW(), NOW())
 
