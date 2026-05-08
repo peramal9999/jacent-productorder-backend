@@ -1,5 +1,6 @@
 package com.jacent.storefront.service.impl;
 
+import com.jacent.storefront.dto.request.ItemsFilterRequest;
 import com.jacent.storefront.dto.response.FilterOptions;
 import com.jacent.storefront.dto.response.ItemsResponse;
 import com.jacent.storefront.entity.*;
@@ -40,7 +41,7 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public ItemsResponse getItems(Integer pageNo, Integer pageSize) {
-        if(pageSize == null){
+        if(pageSize == null || pageSize <= 0){
             pageSize = configurationService.getValueAsInteger(Configuration.PAGINATION_SIZE, 25);
         }
         User user = SecurityUtils.getCurrentUser();
@@ -53,6 +54,25 @@ public class ItemServiceImpl implements ItemService {
                 .content(itemList)
                 .totalElements(total)
                 .totalPages((int) Math.ceil((double) total / pageSize))
+                .build();
+    }
+
+    @Override
+    public ItemsResponse getItemsByFilter(ItemsFilterRequest itemsFilterRequest) {
+        if(itemsFilterRequest.getPageSize() == null || itemsFilterRequest.getPageSize() <= 0){
+            Integer pageSize = configurationService.getValueAsInteger(Configuration.PAGINATION_SIZE, 25);
+            itemsFilterRequest.setPageSize(pageSize);
+        }
+        User user = SecurityUtils.getCurrentUser();
+        long total = itemRepository.getAllItemsCountByFilterAndPagination(user.getStoreId(), itemsFilterRequest);
+
+        List<Item> itemList = itemRepository.getAllItemsFilterAndPagination(user.getStoreId(), itemsFilterRequest);
+        return ItemsResponse.builder()
+                .pageNo(itemsFilterRequest.getPageNo())
+                .pageSize(itemsFilterRequest.getPageSize())
+                .content(itemList)
+                .totalElements(total)
+                .totalPages((int) Math.ceil((double) total / itemsFilterRequest.getPageSize()))
                 .build();
     }
 

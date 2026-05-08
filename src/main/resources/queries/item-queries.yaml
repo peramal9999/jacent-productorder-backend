@@ -48,7 +48,6 @@ item:
       WHERE
          i.ITEM_ID = fsai.ITEM_ID AND
          fsai.STORE_ID = :storeId
-      LIMIT :size OFFSET :offset
     searchItemsByStoreIdAndSearchKeyword: |
       SELECT
         DIVISION_NAME_ID as division,
