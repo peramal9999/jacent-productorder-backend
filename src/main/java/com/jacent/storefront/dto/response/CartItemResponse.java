@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
 public class CartItemResponse {
     private int cartItemId;
     private int itemId;
+    private String itemName;
     private int quantity;
     private BigDecimal price;
     private BigDecimal retailPrice;
