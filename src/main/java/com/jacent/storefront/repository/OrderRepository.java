@@ -7,7 +7,6 @@ import com.jacent.storefront.query.OrderQueries;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
 import org.springframework.jdbc.support.GeneratedKeyHolder;
@@ -21,12 +20,10 @@ import java.util.List;
 @Repository
 public class OrderRepository {
 
-    private final JdbcTemplate jdbcTemplate;
     private final  NamedParameterJdbcTemplate namedParameterJdbcTemplate;
     private final OrderQueries orderQueries;
 
-    public OrderRepository(JdbcTemplate jdbcTemplate, NamedParameterJdbcTemplate namedParameterJdbcTemplate, OrderQueries orderQueries) {
-        this.jdbcTemplate = jdbcTemplate;
+    public OrderRepository(NamedParameterJdbcTemplate namedParameterJdbcTemplate, OrderQueries orderQueries) {
         this.namedParameterJdbcTemplate = namedParameterJdbcTemplate;
         this.orderQueries = orderQueries;
     }
@@ -54,12 +51,15 @@ public class OrderRepository {
 
     public void insertOrderItem(int orderId, OrderItem item) {
         try {
-            jdbcTemplate.update(orderQueries.getAddItemToOrder(),
-                    orderId,
-                    item.getItemId(),
-                    item.getQuantity(),
-                    item.getUnitPrice(),
-                    item.getRetailPrice()
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("orderId", orderId);
+            params.addValue("itemId", item.getItemId());
+            params.addValue("quantity", item.getQuantity());
+            params.addValue("unitPrice", item.getUnitPrice());
+            params.addValue("retailPrice", item.getRetailPrice());
+            namedParameterJdbcTemplate.update(
+                    orderQueries.getAddItemToOrder(),
+                    params
             );
         } catch (DataAccessException ex) {
             throw new RuntimeException("Error inserting order item for orderId: " + orderId, ex);
@@ -84,9 +84,14 @@ public class OrderRepository {
 
     public Order findOrderById(int orderId) {
         try {
-            return jdbcTemplate.queryForObject(orderQueries.getOrderByOrderId(),
-                    new Object[]{orderId},
-                    new BeanPropertyRowMapper<>(Order.class));
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("orderId", orderId);
+
+            return namedParameterJdbcTemplate.queryForObject(
+                    orderQueries.getOrderByOrderId(),
+                    params,
+                    new BeanPropertyRowMapper<>(Order.class)
+            );
         } catch (EmptyResultDataAccessException ex) {
             throw new ResourceNotFoundException("Order not found with id: " + orderId);
         } catch (DataAccessException ex) {
@@ -96,9 +101,14 @@ public class OrderRepository {
 
     public List<OrderItem> findItemsByOrderId(int orderId) {
         try {
-            return jdbcTemplate.query(orderQueries.getOrderItemsByOrderId(),
-                    new Object[]{orderId},
-                    new BeanPropertyRowMapper<>(OrderItem.class));
+            MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("orderId", orderId);
+
+            return namedParameterJdbcTemplate.query(
+                    orderQueries.getOrderItemsByOrderId(),
+                    params,
+                    new BeanPropertyRowMapper<>(OrderItem.class)
+            );
         } catch (DataAccessException ex) {
             throw new RuntimeException("Error fetching items for orderId: " + orderId, ex);
         }

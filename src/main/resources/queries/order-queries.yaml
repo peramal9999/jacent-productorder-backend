@@ -1,7 +1,7 @@
 order:
   queries:
-    orderByOrderId: SELECT * FROM orders WHERE order_id = ?
-    orderItemsByOrderId: SELECT * FROM order_items WHERE order_id = ?
+    orderByOrderId: SELECT * FROM orders WHERE order_id = :orderId
+    orderItemsByOrderId: SELECT * FROM order_items WHERE order_id = :orderId
     ordersByUserId: SELECT * FROM orders o WHERE o.user_id = :userId AND o.order_date >= :startDate ORDER BY o.created_at DESC
     createOrder: INSERT INTO orders (user_id, status, order_date) VALUES (:userId, :status, :orderDate)
-    addItemToOrder: INSERT INTO order_items (order_id, item_id, quantity, unit_price, retail_price) VALUES (?, ?, ?, ?,?)
+    addItemToOrder: INSERT INTO order_items (order_id, item_id, quantity, unit_price, retail_price) VALUES (:orderId, :itemId, :quantity, :unitPrice, :retailPrice)
