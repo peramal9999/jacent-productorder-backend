@@ -6,7 +6,7 @@ cart:
     addItemToCart: INSERT INTO cart_items (cart_id, item_id, quantity) VALUES (?, ?, ?)
     deleteCart: DELETE FROM carts WHERE cart_id = ?
     deleteCartItemByCartItemId: DELETE FROM cart_items WHERE cart_item_id = ?
-    cartItemsByCartId: SELECT cart_item_id, cart_id, item_id, quantity, added_at, updated_at FROM cart_items WHERE cart_id = ?
-    cartItemByCartItemId: SELECT cart_item_id, cart_id, item_id, quantity, added_at, updated_at FROM cart_items WHERE cart_item_id = ?
+    cartItemsByCartId: SELECT cart_item_id, cart_id, item_id, quantity, created_at, updated_at FROM cart_items WHERE cart_id = ?
+    cartItemByCartItemId: SELECT cart_item_id, cart_id, item_id, quantity, created_at, updated_at FROM cart_items WHERE cart_item_id = ?
     updateCartItemQuantity: UPDATE cart_items SET quantity = ?, updated_at = NOW() WHERE cart_item_id = ?
-    cartItemByCartIdAndItemId: SELECT cart_item_id, cart_id, item_id, quantity, added_at, updated_at FROM cart_items WHERE cart_id = ? AND item_id = ?
+    cartItemByCartIdAndItemId: SELECT cart_item_id, cart_id, item_id, quantity, created_at, updated_at FROM cart_items WHERE cart_id = ? AND item_id = ?

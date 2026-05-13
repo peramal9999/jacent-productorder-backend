@@ -139,7 +139,7 @@ public class CartServiceImpl implements CartService {
                 .quantity(cartItem.getQuantity())
                 .price(item.getPrice())
                 .retailPrice(item.getRetailPrice())
-                .addedAt(cartItem.getAddedAt())
+                .createdAt(cartItem.getCreatedAt())
                 .updatedAt(cartItem.getUpdatedAt())
                 .build();
     }

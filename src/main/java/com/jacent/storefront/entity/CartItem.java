@@ -16,6 +16,6 @@ public class CartItem {
     private int cartId;
     private int itemId;
     private int quantity;
-    private LocalDateTime addedAt;
+    private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }
