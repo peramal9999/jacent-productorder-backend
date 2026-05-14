@@ -4,4 +4,4 @@ order:
     orderItemsByOrderId: SELECT * FROM order_items WHERE order_id = :orderId
     ordersByUserId: SELECT * FROM orders o WHERE o.user_id = :userId AND o.order_date >= :startDate ORDER BY o.created_at DESC
     createOrder: INSERT INTO orders (order_id, user_id, status, order_date) VALUES (:orderId, :userId, :status, :orderDate)
-    addItemToOrder: INSERT INTO order_items (order_item_id, order_id, item_id, quantity, unit_price, retail_price) VALUES (:orderItemId, :orderId, :itemId, :quantity, :unitPrice, :retailPrice)
+    addItemToOrder: INSERT INTO order_items (order_item_id, order_id, item_id, item_desc, quantity, unit_price, retail_price) VALUES (:orderItemId, :orderId, :itemId, :itemDesc, :quantity, :unitPrice, :retailPrice)

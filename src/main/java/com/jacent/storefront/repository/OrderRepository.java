@@ -49,6 +49,7 @@ public class OrderRepository {
             params.addValue("orderItemId", orderItemId);
             params.addValue("orderId", orderId);
             params.addValue("itemId", item.getItemId());
+            params.addValue("itemDesc", item.getItemDesc());
             params.addValue("quantity", item.getQuantity());
             params.addValue("unitPrice", item.getUnitPrice());
             params.addValue("retailPrice", item.getRetailPrice());
