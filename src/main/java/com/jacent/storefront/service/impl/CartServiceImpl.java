@@ -65,7 +65,7 @@ public class CartServiceImpl implements CartService {
 
     // Update quantity
     @Override
-    public CartResponse updateItem(int cartItemId, CartItemRequest request) throws AccessDeniedException {
+    public CartResponse updateItem(String cartItemId, CartItemRequest request) throws AccessDeniedException {
         User user = SecurityUtils.getCurrentUser();
         // ✓ verify item belongs to user's cart
         verifyCartItemOwnership(user.getUserId(), cartItemId);
@@ -78,7 +78,7 @@ public class CartServiceImpl implements CartService {
 
     // Remove single item
     @Override
-    public CartResponse removeItem(int cartItemId) throws AccessDeniedException {
+    public CartResponse removeItem(String cartItemId) throws AccessDeniedException {
         User user = SecurityUtils.getCurrentUser();
         // ✓ verify item belongs to user's cart
         verifyCartItemOwnership(user.getUserId(), cartItemId);
@@ -99,12 +99,12 @@ public class CartServiceImpl implements CartService {
     }
 
     // Get or create active cart
-    private Cart getOrCreateCart(int userId) {
+    private Cart getOrCreateCart(String userId) {
         return cartRepository.findCartByUserId(userId)
                 .orElseGet(() -> cartRepository.createCart(userId));
     }
 
-    public Cart verifyCartOwnership(int userId, int cartId) throws AccessDeniedException {
+    public Cart verifyCartOwnership(String userId, String cartId) throws AccessDeniedException {
         Cart cart = cartRepository.findCartById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found: " + cartId));
 
@@ -115,7 +115,7 @@ public class CartServiceImpl implements CartService {
         return cart;
     }
 
-    public CartItem verifyCartItemOwnership(int userId, int cartItemId) throws AccessDeniedException {
+    public CartItem verifyCartItemOwnership(String userId, String cartItemId) throws AccessDeniedException {
         CartItem item = cartRepository.findItemById(cartItemId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart item not found: " + cartItemId));
 
@@ -136,6 +136,7 @@ public class CartServiceImpl implements CartService {
                 .cartItemId(cartItem.getCartItemId())
                 .itemId(cartItem.getItemId())
                 .itemName(item.getItemName())
+                .itemDesc(item.getItemDesc())
                 .quantity(cartItem.getQuantity())
                 .price(item.getPrice())
                 .retailPrice(item.getRetailPrice())

@@ -12,10 +12,10 @@ import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Repository;
+
+import java.util.UUID;
 
 @Slf4j
 @Repository
@@ -59,22 +59,21 @@ public class UserRepository {
 
     public User createUser(User user) {
         log.info("Creating new user with email: {}", user.getEmail());
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+
+        String userId = UUID.randomUUID().toString();
+
         MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("userId", userId);
         params.addValue("firstName", user.getFirstName().trim());
         params.addValue("lastName", user.getLastName().trim());
         params.addValue("email", user.getEmail().toLowerCase().trim());
         params.addValue("password", user.getPassword());
         params.addValue("storeId", user.getStoreId());
-        params.addValue("isEnabled", user.isEnabled());
-        params.addValue("isLocked", user.isLocked());
+        params.addValue("isEnabled", user.isEnabled() ? 1 : 0);
+        params.addValue("isLocked", user.isLocked() ? 1 : 0);
 
         try {
-            namedParameterJdbcTemplate.update(
-                    userQueries.getCreateUser(),
-                    params,
-                    keyHolder
-            );
+            namedParameterJdbcTemplate.update(userQueries.getCreateUser(), params);
         } catch (DataIntegrityViolationException e) {
             log.warn("User creation failed - duplicate email: {}", user.getEmail());
             throw new ResourceCreationException("User with this email already exists", e);
@@ -85,13 +84,7 @@ public class UserRepository {
             log.error("User creation failed for email: {}", user.getEmail(), e);
             throw new ResourceCreationException("Failed to create user", e);
         }
-        Number generatedId = keyHolder.getKey();
-        if (generatedId == null) {
-            log.error("Failed to retrieve generated user ID");
-            throw new ResourceCreationException("Failed to retrieve generated user ID");
-        }
 
-        int userId = generatedId.intValue();
         user.setUserId(userId);
         log.info("User created successfully with ID: {} and email: {}", userId, user.getEmail());
 

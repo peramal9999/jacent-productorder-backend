@@ -10,15 +10,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.sql.PreparedStatement;
 import java.sql.Statement;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @Repository
 @RequiredArgsConstructor
@@ -30,7 +30,7 @@ public class CartRepository {
     @Autowired
     CartQueries cartQueries;
 
-    public Optional<Cart> findCartByUserId(int userId) {
+    public Optional<Cart> findCartByUserId(String userId) {
         try {
             Cart cart = jdbcTemplate.queryForObject(
                     cartQueries.getCartByUserId(),
@@ -43,24 +43,21 @@ public class CartRepository {
         }
     }
 
-    public Cart createCart(int userId) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public Cart createCart(String userId) {
+        String cartId = UUID.randomUUID().toString();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                    cartQueries.getCreateCart(),
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            ps.setInt(1, userId);
+            PreparedStatement ps = connection.prepareStatement(cartQueries.getCreateCart());
+            ps.setString(1, cartId);
+            ps.setString(2, userId);
             return ps;
-        }, keyHolder);
+        });
 
-        int generatedId = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        return findCartById(generatedId)
+        return findCartById(cartId)
                 .orElseThrow(() -> new RuntimeException("Failed to create cart for user: " + userId));
     }
 
-    public Optional<Cart> findCartById(int cartId) {
+    public Optional<Cart> findCartById(String cartId) {
         try {
             Cart cart = jdbcTemplate.queryForObject(
                     cartQueries.getCartByCartId(),
@@ -73,7 +70,7 @@ public class CartRepository {
         }
     }
 
-    public List<CartItem> findItemsByCartId(int cartId) {
+    public List<CartItem> findItemsByCartId(String cartId) {
         return jdbcTemplate.query(
                 cartQueries.getCartItemsByCartId(),
                 new BeanPropertyRowMapper<>(CartItem.class),
@@ -81,7 +78,7 @@ public class CartRepository {
         );
     }
 
-    public Optional<CartItem> findItemByCartIdAndItemId(int cartId, int itemId) {
+    public Optional<CartItem> findItemByCartIdAndItemId(String cartId, int itemId) {
         try {
             CartItem item = jdbcTemplate.queryForObject(
                     cartQueries.getCartItemByCartIdAndItemId(),
@@ -94,26 +91,23 @@ public class CartRepository {
         }
     }
 
-    public CartItem addItemToCart(int cartId, CartItemRequest request) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public CartItem addItemToCart(String cartId, CartItemRequest request) {
+        String cartItemId = UUID.randomUUID().toString();
 
         jdbcTemplate.update(connection -> {
-            PreparedStatement ps = connection.prepareStatement(
-                    cartQueries.getAddItemToCart(),
-                    Statement.RETURN_GENERATED_KEYS
-            );
-            ps.setInt(1, cartId);
-            ps.setInt(2, request.getItemId());
-            ps.setInt(3, request.getQuantity());
+            PreparedStatement ps = connection.prepareStatement(cartQueries.getAddItemToCart());
+            ps.setString(1, cartItemId);
+            ps.setString(2, cartId);
+            ps.setInt(3, request.getItemId());
+            ps.setInt(4, request.getQuantity());
             return ps;
-        }, keyHolder);
+        });
 
-        int generatedId = Objects.requireNonNull(keyHolder.getKey()).intValue();
-        return findItemById(generatedId)
+        return findItemById(cartItemId)
                 .orElseThrow(() -> new RuntimeException("Failed to add cart item"));
     }
 
-    public CartItem updateItemQuantity(int cartItemId, int quantity) {
+    public CartItem updateItemQuantity(String cartItemId, int quantity) {
         jdbcTemplate.update(
                 cartQueries.getUpdateCartItemQuantity(),
                 quantity, cartItemId
@@ -122,21 +116,21 @@ public class CartRepository {
                 .orElseThrow(() -> new RuntimeException("Cart item not found: " + cartItemId));
     }
 
-    public void removeItem(int cartItemId) {
+    public void removeItem(String cartItemId) {
         jdbcTemplate.update(
                 cartQueries.getDeleteCartItemByCartItemId(),
                 cartItemId
         );
     }
 
-    public void clearCart(int cartId) {
+    public void clearCart(String cartId) {
         jdbcTemplate.update(
                 cartQueries.getDeleteCart(),
                 cartId
         );
     }
 
-    public Optional<CartItem> findItemById(int cartItemId) {
+    public Optional<CartItem> findItemById(String cartItemId) {
         try {
             CartItem item = jdbcTemplate.queryForObject(
                     cartQueries.getCartItemByCartItemId(),

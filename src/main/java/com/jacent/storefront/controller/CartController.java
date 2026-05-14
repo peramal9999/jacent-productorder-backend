@@ -31,13 +31,13 @@ public class CartController {
     }
 
     @PutMapping("/{cartItemId}")
-    public ResponseEntity<CartResponse> updateItem(@PathVariable int cartItemId,
+    public ResponseEntity<CartResponse> updateItem(@PathVariable String cartItemId,
             @Valid @RequestBody CartItemRequest request) throws AccessDeniedException {
         return ResponseEntity.ok(cartService.updateItem(cartItemId, request));
     }
 
     @DeleteMapping("/items/{cartItemId}")
-    public ResponseEntity<CartResponse> removeItem(@PathVariable int cartItemId) throws AccessDeniedException {
+    public ResponseEntity<CartResponse> removeItem(@PathVariable String cartItemId) throws AccessDeniedException {
         return ResponseEntity.ok(cartService.removeItem(cartItemId));
     }
 

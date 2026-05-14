@@ -12,8 +12,8 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class Order {
-    private int orderId;
-    private int userId;
+    private String orderId;
+    private String userId;
     private String netsuiteOrderId;
     private String status;
     private LocalDateTime orderDate;

@@ -9,13 +9,12 @@ import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.namedparam.MapSqlParameterSource;
 import org.springframework.jdbc.core.namedparam.NamedParameterJdbcTemplate;
-import org.springframework.jdbc.support.GeneratedKeyHolder;
-import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.List;
+import java.util.UUID;
 
 @Repository
 public class OrderRepository {
@@ -28,45 +27,39 @@ public class OrderRepository {
         this.orderQueries = orderQueries;
     }
 
-    public int insertOrder(int userId, String status) {
-        KeyHolder keyHolder = new GeneratedKeyHolder();
+    public String insertOrder(String userId, String status) {
+        String orderId = UUID.randomUUID().toString();
 
         MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("orderId", orderId);
         params.addValue("userId", userId);
         params.addValue("status", status);
         params.addValue("orderDate", Timestamp.valueOf(LocalDateTime.now()));
 
-        namedParameterJdbcTemplate.update(
-                orderQueries.getCreateOrder(),
-                params,
-                keyHolder
-        );
+        namedParameterJdbcTemplate.update(orderQueries.getCreateOrder(), params);
 
-        if (keyHolder.getKey() == null) {
-            throw new RuntimeException("Failed to retrieve generated order ID");
-        }
-
-        return keyHolder.getKey().intValue();
+        return orderId;
     }
 
-    public void insertOrderItem(int orderId, OrderItem item) {
+    public void insertOrderItem(String orderId, OrderItem item) {
         try {
+            String orderItemId = UUID.randomUUID().toString();
+
             MapSqlParameterSource params = new MapSqlParameterSource();
+            params.addValue("orderItemId", orderItemId);
             params.addValue("orderId", orderId);
             params.addValue("itemId", item.getItemId());
             params.addValue("quantity", item.getQuantity());
             params.addValue("unitPrice", item.getUnitPrice());
             params.addValue("retailPrice", item.getRetailPrice());
-            namedParameterJdbcTemplate.update(
-                    orderQueries.getAddItemToOrder(),
-                    params
-            );
+
+            namedParameterJdbcTemplate.update(orderQueries.getAddItemToOrder(), params);
         } catch (DataAccessException ex) {
             throw new RuntimeException("Error inserting order item for orderId: " + orderId, ex);
         }
     }
 
-    public List<Order> findOrdersByUser(int userId, LocalDateTime threeMonthsAgo) {
+    public List<Order> findOrdersByUser(String userId, LocalDateTime threeMonthsAgo) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("userId", userId);
@@ -82,7 +75,7 @@ public class OrderRepository {
         }
     }
 
-    public Order findOrderById(int orderId) {
+    public Order findOrderById(String orderId) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("orderId", orderId);
@@ -99,7 +92,7 @@ public class OrderRepository {
         }
     }
 
-    public List<OrderItem> findItemsByOrderId(int orderId) {
+    public List<OrderItem> findItemsByOrderId(String orderId) {
         try {
             MapSqlParameterSource params = new MapSqlParameterSource();
             params.addValue("orderId", orderId);

@@ -12,8 +12,8 @@ import java.math.BigDecimal;
 @NoArgsConstructor
 @AllArgsConstructor
 public class OrderItem {
-    private int orderItemId;
-    private int orderId;
+    private String orderItemId;
+    private String orderId;
     private int itemId;
     private BigDecimal unitPrice;
     private BigDecimal retailPrice;

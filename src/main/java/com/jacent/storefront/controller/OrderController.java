@@ -25,12 +25,12 @@ public class OrderController {
     }
 
     @GetMapping("/{orderId}")
-    public ResponseEntity<?> getOrder(@PathVariable int orderId) {
+    public ResponseEntity<?> getOrder(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.getOrderDetails(orderId));
     }
 
     @PostMapping("/{orderId}/reorder")
-    public ResponseEntity<?> reorder(@PathVariable int orderId) {
+    public ResponseEntity<?> reorder(@PathVariable String orderId) {
         return ResponseEntity.ok(orderService.reorder(orderId));
     }
 

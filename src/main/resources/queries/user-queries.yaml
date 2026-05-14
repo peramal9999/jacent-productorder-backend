@@ -2,6 +2,6 @@ user:
   queries:
     userByEmail: SELECT user_id, email, first_name, last_name, password_hash as password, store_id, enabled, locked FROM users WHERE email = :email
     emailExists: SELECT EXISTS(SELECT 1 FROM users WHERE email = :email)
-    createUser: INSERT INTO users (first_name, last_name, email, password_hash, store_id, enabled, locked, created_at, updated_at)
-                  VALUES (:firstName, :lastName, :email, :password, :storeId, :isEnabled, :isLocked, NOW(), NOW())
+    createUser: INSERT INTO users (user_id, first_name, last_name, email, password_hash, store_id, enabled, locked)
+                  VALUES (:userId, :firstName, :lastName, :email, :password, :storeId, :isEnabled, :isLocked)
 

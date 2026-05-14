@@ -11,9 +11,9 @@ public interface CartService {
 
     CartResponse addItemToCart(@Valid CartItemRequest cartItemRequest) throws AccessDeniedException;
 
-    CartResponse updateItem(int cartItemId, @Valid CartItemRequest request) throws AccessDeniedException;
+    CartResponse updateItem(String cartItemId, @Valid CartItemRequest request) throws AccessDeniedException;
 
-    CartResponse removeItem(int cartItemId) throws AccessDeniedException;
+    CartResponse removeItem(String cartItemId) throws AccessDeniedException;
 
     void clearCart();
 

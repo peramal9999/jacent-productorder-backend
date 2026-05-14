@@ -36,9 +36,9 @@ public class OrderServiceImpl implements OrderService {
 
     @Transactional
     @Override
-    public int createOrder() {
+    public String createOrder() {
         User currentUser = SecurityUtils.getCurrentUser();
-        int orderId = orderRepository.insertOrder(currentUser.getUserId(), "pending");
+        String orderId = orderRepository.insertOrder(currentUser.getUserId(), "pending");
         CartResponse cart = cartService.getCartByUser();
         for (CartItemResponse cartItem : cart.getItems()) {
             Item item = itemRepository.getItemById(currentUser.getStoreId(), cartItem.getItemId());
@@ -65,7 +65,7 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public OrderDetailsResponse getOrderDetails(int orderId) {
+    public OrderDetailsResponse getOrderDetails(String orderId) {
         Order order = orderRepository.findOrderById(orderId);
         List<OrderItem> items = orderRepository.findItemsByOrderId(orderId);
 
@@ -76,10 +76,10 @@ public class OrderServiceImpl implements OrderService {
     }
 
     @Override
-    public int reorder(int oldOrderId) {
+    public String reorder(String oldOrderId) {
         Order oldOrder = orderRepository.findOrderById(oldOrderId);
         User currentUser = SecurityUtils.getCurrentUser();
-        int newOrderId = orderRepository.insertOrder(currentUser.getUserId(), "pending");
+        String newOrderId = orderRepository.insertOrder(currentUser.getUserId(), "pending");
 
         List<OrderItem> items = orderRepository.findItemsByOrderId(oldOrderId);
 

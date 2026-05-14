@@ -18,7 +18,7 @@ import java.util.List;
 @AllArgsConstructor
 public class User implements UserDetails {
 
-    private int userId;
+    private String userId;
     private String firstName;
     private String lastName;
     private String email;
