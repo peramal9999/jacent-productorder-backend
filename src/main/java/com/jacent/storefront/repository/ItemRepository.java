@@ -183,4 +183,25 @@ public class ItemRepository {
             throw new ResourceRetrievalException("Search operation failed", e);
         }
     }
+
+    public List<Item> getAllItemsByIdIn(Integer storeId, List<Integer> itemIds) {
+        log.debug("Fetching items for itemIds: {}",itemIds);
+
+        MapSqlParameterSource params = new MapSqlParameterSource();
+        params.addValue("storeId", storeId);
+        params.addValue("itemIds", itemIds);
+
+        try {
+            List<Item> items = namedParameterJdbcTemplate.query(
+                    itemQueries.getAllItemsByIdIn(),
+                    params,
+                    ITEM_ROW_MAPPER
+            );
+            log.debug("Retrieved items for itemIds: {}", itemIds);
+            return items;
+        } catch (DataAccessException e) {
+            log.error("Failed to retrieve items for itemIds: {}", itemIds, e);
+            throw new ResourceRetrievalException("Failed to retrieve items", e);
+        }
+    }
 }

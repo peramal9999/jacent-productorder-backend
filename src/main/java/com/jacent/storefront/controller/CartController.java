@@ -1,6 +1,7 @@
 package com.jacent.storefront.controller;
 
 import com.jacent.storefront.dto.request.CartItemRequest;
+import com.jacent.storefront.dto.response.CartItemResponse;
 import com.jacent.storefront.dto.response.CartResponse;
 import com.jacent.storefront.exception.AccessDeniedException;
 import com.jacent.storefront.service.CartService;
@@ -25,25 +26,25 @@ public class CartController {
     }
 
     @PostMapping("/items")
-    public ResponseEntity<CartResponse> addItemToCart(@Valid @RequestBody CartItemRequest cartItemRequest) throws AccessDeniedException {
-        CartResponse cart = cartService.addItemToCart(cartItemRequest);
-        return ResponseEntity.status(HttpStatus.CREATED).body(cart);
+    public ResponseEntity<CartItemResponse> addItemToCart(@Valid @RequestBody CartItemRequest cartItemRequest) throws AccessDeniedException {
+        CartItemResponse cartItemResponse = cartService.addItemToCart(cartItemRequest);
+        return ResponseEntity.status(HttpStatus.CREATED).body(cartItemResponse);
     }
 
     @PutMapping("/{cartItemId}")
-    public ResponseEntity<CartResponse> updateItem(@PathVariable String cartItemId,
+    public ResponseEntity<CartItemResponse> updateItem(@PathVariable String cartItemId,
             @Valid @RequestBody CartItemRequest request) throws AccessDeniedException {
         return ResponseEntity.ok(cartService.updateItem(cartItemId, request));
     }
 
     @DeleteMapping("/items/{cartItemId}")
-    public ResponseEntity<CartResponse> removeItem(@PathVariable String cartItemId) throws AccessDeniedException {
+    public ResponseEntity<Boolean> removeItem(@PathVariable String cartItemId) throws AccessDeniedException {
         return ResponseEntity.ok(cartService.removeItem(cartItemId));
     }
 
     @DeleteMapping
-    public ResponseEntity<Void> clearCart() {
+    public ResponseEntity<Boolean> clearCart() {
         cartService.clearCart();
-        return ResponseEntity.noContent().build();
+        return ResponseEntity.ok(true);
     }
 }

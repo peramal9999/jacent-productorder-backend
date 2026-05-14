@@ -40,6 +40,22 @@ item:
          STORE_ID = :storeId AND
          ITEM_ID = :itemId
       LIMIT 1
+    allItemsByIdIn:
+      SELECT
+        DIVISION_NAME_ID as division,
+        COMMODITY,
+        UPC_CODE,
+        ITEM_ID,
+        ITEM_NAME,
+        ITEM_DESC,
+        PRICE,
+        RETAIL_PRICE,
+        STORE_ID
+      FROM
+        VW_AUTHORIZED_PRODUCT_CATALOG
+      WHERE
+        STORE_ID = :storeId AND
+        ITEM_ID IN (:itemIds)
     itemCountByStoreId: |
       SELECT
         COUNT(*)
