@@ -68,6 +68,7 @@ item:
         DIVISION_NAME_ID as division,
         COMMODITY,
         UPC_CODE,
+        ITEM_ID,
         ITEM_NAME,
         ITEM_DESC,
         PRICE,
@@ -77,9 +78,9 @@ item:
         VW_AUTHORIZED_PRODUCT_CATALOG
       WHERE
          STORE_ID = :storeId AND
-         ITEM_NAME LIKE :search OR 
-         ITEM_DESC LIKE :search OR 
-         UPC_CODE LIKE :search OR 
-         COMMODITY LIKE :search OR 
-         DIVISION_NAME_ID LIKE :search
+         ITEM_ID ILIKE :search OR 
+         ITEM_DESC ILIKE :search OR 
+         UPC_CODE ILIKE :search OR 
+         COMMODITY ILIKE :search OR 
+         DIVISION_NAME_ID ILIKE :search
       LIMIT :size

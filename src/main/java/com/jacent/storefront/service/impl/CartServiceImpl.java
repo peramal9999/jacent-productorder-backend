@@ -108,7 +108,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findCartById(cartId)
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found: " + cartId));
 
-        if (cart.getUserId() != userId) {
+        if (!userId.equals(cart.getUserId())) {
             log.warn("Unauthorized cart access: userId={} tried to access cartId={}", userId, cartId);
             throw new AccessDeniedException("You do not have access to this cart");
         }
@@ -122,7 +122,7 @@ public class CartServiceImpl implements CartService {
         Cart cart = cartRepository.findCartById(item.getCartId())
                 .orElseThrow(() -> new ResourceNotFoundException("Cart not found: "+ item.getCartId()));
 
-        if (cart.getUserId() != userId) {
+        if (!userId.equals(cart.getUserId())) {
             log.warn("Unauthorized cart item access: userId={} tried to access cartItemId={}", userId, cartItemId);
             throw new AccessDeniedException("You do not have access to this cart item");
         }

@@ -61,7 +61,7 @@ public class CartRepository {
         try {
             Cart cart = jdbcTemplate.queryForObject(
                     cartQueries.getCartByCartId(),
-                    new BeanPropertyRowMapper<>(Cart.class),
+                    new SnowflakeBeanPropertyRowMapper<>(Cart.class),
                     cartId
             );
             return Optional.ofNullable(cart);
@@ -73,7 +73,7 @@ public class CartRepository {
     public List<CartItem> findItemsByCartId(String cartId) {
         return jdbcTemplate.query(
                 cartQueries.getCartItemsByCartId(),
-                new BeanPropertyRowMapper<>(CartItem.class),
+                new SnowflakeBeanPropertyRowMapper<>(CartItem.class),
                 cartId
         );
     }

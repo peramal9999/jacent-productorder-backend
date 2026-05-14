@@ -1,5 +1,8 @@
 package com.jacent.storefront.configuration;
 
+import com.zaxxer.hikari.HikariConfig;
+import com.zaxxer.hikari.HikariDataSource;
+import net.snowflake.client.jdbc.SnowflakeBasicDataSource;
 import org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.openssl.PEMParser;
@@ -33,32 +36,59 @@ public class SnowflakeConfig {
         this.props = props;
     }
 
+//    @Bean
+//    public DataSource snowflakeDataSource() throws Exception {
+//        PrivateKey privateKey = loadPrivateKey(props.getPrivateKeyFile(), props.getPrivateKeyPassphrase());
+//
+//        Properties jdbcProps = new Properties();
+//        jdbcProps.put("user", props.getUser());
+//        jdbcProps.put("privateKey", privateKey);          // ✅ PrivateKey object
+//        jdbcProps.put("db", props.getDatabase());
+//        jdbcProps.put("schema", props.getSchema());
+//        jdbcProps.put("warehouse", props.getWarehouse());
+//        jdbcProps.put("role", props.getRole());
+//
+//        // ✅ Use HikariCP — pass PrivateKey via connectionInitSql workaround
+//        // Actually simplest: anonymous DataSource implementation
+//        String url = props.getUrl();
+//        return new AbstractDataSource() {
+//            @Override
+//            public Connection getConnection() throws SQLException {
+//                return DriverManager.getConnection(url, jdbcProps);
+//            }
+//
+//            @Override
+//            public Connection getConnection(String username, String password) throws SQLException {
+//                return DriverManager.getConnection(url, jdbcProps);
+//            }
+//        };
+//    }
+
     @Bean
     public DataSource snowflakeDataSource() throws Exception {
         PrivateKey privateKey = loadPrivateKey(props.getPrivateKeyFile(), props.getPrivateKeyPassphrase());
 
-        Properties jdbcProps = new Properties();
-        jdbcProps.put("user", props.getUser());
-        jdbcProps.put("privateKey", privateKey);          // ✅ PrivateKey object
-        jdbcProps.put("db", props.getDatabase());
-        jdbcProps.put("schema", props.getSchema());
-        jdbcProps.put("warehouse", props.getWarehouse());
-        jdbcProps.put("role", props.getRole());
+        // Build underlying Snowflake DataSource
+        SnowflakeBasicDataSource snowflakeDS = new SnowflakeBasicDataSource();
+        snowflakeDS.setUrl(props.getUrl());
+        snowflakeDS.setUser(props.getUser());
+        snowflakeDS.setPrivateKey(privateKey);
+        snowflakeDS.setDatabaseName(props.getDatabase());
+        snowflakeDS.setSchema(props.getSchema());
+        snowflakeDS.setWarehouse(props.getWarehouse());
+        snowflakeDS.setRole(props.getRole());
 
-        // ✅ Use HikariCP — pass PrivateKey via connectionInitSql workaround
-        // Actually simplest: anonymous DataSource implementation
-        String url = props.getUrl();
-        return new AbstractDataSource() {
-            @Override
-            public Connection getConnection() throws SQLException {
-                return DriverManager.getConnection(url, jdbcProps);
-            }
+        // Wrap with HikariCP
+        HikariConfig hikariConfig = new HikariConfig();
+        hikariConfig.setDataSource(snowflakeDS);
+        hikariConfig.setMinimumIdle(2);
+        hikariConfig.setMaximumPoolSize(10);
+        hikariConfig.setConnectionTimeout(30000);
+        hikariConfig.setIdleTimeout(600000);
+        hikariConfig.setMaxLifetime(1800000);
+        hikariConfig.setConnectionTestQuery("SELECT 1");
 
-            @Override
-            public Connection getConnection(String username, String password) throws SQLException {
-                return DriverManager.getConnection(url, jdbcProps);
-            }
-        };
+        return new HikariDataSource(hikariConfig);
     }
 
     private PrivateKey loadPrivateKey(String keyFile, String passphrase) throws Exception {

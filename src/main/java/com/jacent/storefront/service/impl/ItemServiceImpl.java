@@ -83,7 +83,7 @@ public class ItemServiceImpl implements ItemService {
             return openSearchService.searchItems(searchKeyword.trim());
         } else {
             // Search from DB
-            String escapedKeyword = escapeSearchKeyword(searchKeyword.trim());
+            String escapedKeyword = escapeSearchKeyword(searchKeyword.trim()).toLowerCase();
             User user = SecurityUtils.getCurrentUser();
             Integer pageSize = configurationService.getValueAsInteger(Configuration.PAGINATION_SIZE, 25);
             return itemRepository.searchItemsByStoreIdAndSearchKeyword(user.getStoreId(), escapedKeyword, pageSize);
@@ -105,14 +105,14 @@ public class ItemServiceImpl implements ItemService {
     @Override
     public FilterOptions getFilterOptions() {
         User user = SecurityUtils.getCurrentUser();
-        Store store = storeRepository.findStoreByStoreId(user.getStoreId());
-        Location location = storeRepository.findLocationByLocationId(store.getLocationId());
-        List<Division> divisions = divisionRepository.findAllDivisionsByStoreId(store.getStoreId());
-        List<Commodity> commodities = commodityRepository.findAllCommoditiesByStoreId(store.getStoreId());
+//        Store store = storeRepository.findStoreByStoreId(user.getStoreId());
+//        Location location = storeRepository.findLocationByLocationId(store.getLocationId());
+//        List<Division> divisions = divisionRepository.findAllDivisionsByStoreId(user.getStoreId());
+        List<Commodity> commodities = commodityRepository.findAllCommoditiesByStoreId(user.getStoreId());
         FilterOptions filterOptions = FilterOptions.builder()
-                .store(store)
-                .location(location)
-                .divisions(divisions)
+//                .store(store)
+//                .location(location)
+//                .divisions(divisions)
                 .commodities(commodities)
                 .build();
         return filterOptions;
