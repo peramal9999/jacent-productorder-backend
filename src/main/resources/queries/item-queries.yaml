@@ -108,8 +108,6 @@ item:
         PRICE,
         RETAIL_PRICE,
         UPC_CODE,
-        DIVISION_NAME_ID as DIVISION,
-        COMMODITY,
         LISTAGG(DISTINCT STORE_ID, ',') AS STORE_IDS
       FROM
         VW_AUTHORIZED_PRODUCT_CATALOG
@@ -119,7 +117,6 @@ item:
         ITEM_DESC,
         PRICE,
         RETAIL_PRICE,
-        UPC_CODE,
-        DIVISION_NAME_ID,
-        COMMODITY
+        UPC_CODE
+      ORDER BY ITEM_ID
       LIMIT :size OFFSET :offset

@@ -41,4 +41,10 @@ public class ItemController {
     public ResponseEntity<List<Item>> searchItems(@RequestParam(required = true) String searchString) throws IOException {
         return ResponseEntity.ok(itemService.searchItems(searchString));
     }
+
+    @GetMapping("/rebuild-opensearch-index")
+    public ResponseEntity<?> rebuildOpenSearchIndex() {
+        itemService.rebuildOpenSearchIndexForItems();
+        return ResponseEntity.ok("Rebuild OpenSearch index initiated...!");
+    }
 }
