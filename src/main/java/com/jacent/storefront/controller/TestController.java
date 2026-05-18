@@ -1,5 +1,6 @@
 package com.jacent.storefront.controller;
 
+import com.jacent.storefront.service.ItemService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -12,8 +13,11 @@ public class TestController {
 
     private final JdbcTemplate jdbcTemplate;
 
-    TestController(JdbcTemplate jdbcTemplate) {
+    private final ItemService itemService;
+
+    TestController(JdbcTemplate jdbcTemplate, ItemService itemService) {
         this.jdbcTemplate = jdbcTemplate;
+        this.itemService = itemService;
     }
 
     @GetMapping("/dbconnection")
@@ -24,5 +28,11 @@ public class TestController {
         } else {
             return ResponseEntity.status(500).body("Database connection failed!");
         }
+    }
+
+    @GetMapping("/rebuild-opensearch-index")
+    public ResponseEntity<?> rebuildOpenSearchIndex() {
+        itemService.rebuildOpenSearchIndexForItems();
+        return ResponseEntity.ok("Rebuild OpenSearch index initiated...!");
     }
 }

@@ -106,11 +106,13 @@ public class OpenSearchServiceImpl implements OpenSearchService {
     public void bulkIndexProducts(List<ItemWithStoreIds> items) throws IOException {
         BulkRequest.Builder bulkRequest = new BulkRequest.Builder();
 
-        for (Item item : items) {
+        for (int i = 0; i < items.size(); i++) {
+            Item item = items.get(i);
+            int currentIndex  = i;
             bulkRequest.operations(op -> op
-                    .index(i -> i
+                    .index(idx -> idx
                             .index(INDEX_NAME)
-                            .id(String.valueOf(item.getItemId()))
+                            .id(item.getItemId() + "_" + currentIndex)
                             .document(item)
                     )
             );
@@ -132,55 +134,82 @@ public class OpenSearchServiceImpl implements OpenSearchService {
     @Override
     public List<ItemWithStoreIds> searchItems(String searchString) throws IOException {
 
+        boolean isNumeric = searchString.matches("\\d+");
+
         SearchResponse<ItemWithStoreIds> response = openSearchClient.search(s -> s
                         .index(INDEX_NAME)
                         .query(q -> q
-                                .bool(b -> b
+                                .bool(b -> {
 
-                                        // 1. MULTI-MATCH — best for full word matches across fields
-                                        // "Cookware" matches "Cookware"
-                                        .should(s1 -> s1.multiMatch(m -> m
-                                                .fields(List.of(
-                                                        "itemName^4",    // boost name highest
-                                                        "itemDesc^2",    // desc medium
-                                                        "upcCode^3",     // upc high
-                                                        "commodity^1",
-                                                        "division^1"
-                                                ))
-                                                .query(searchString)
-                                                .type(TextQueryType.BestFields)
-                                                .fuzziness("AUTO")       // handles typos
-                                        ))
+                                    // 1. MULTI-MATCH with fuzziness — text fields only
+                                    b.should(s1 -> s1.multiMatch(m -> m
+                                            .fields(List.of(
+                                                    "itemName^4",   // text field - safe
+                                                    "itemDesc^2"    // text field - safe
+                                            ))
+                                            .query(searchString)
+                                            .type(TextQueryType.BestFields)
+                                            .fuzziness("AUTO")
+                                    ));
 
-                                        // 2. MATCH PHRASE PREFIX — best for partial/prefix matches
-                                        // "Cook" matches "Cookware", "Cooking"
-                                        .should(s2 -> s2.multiMatch(m -> m
-                                                .fields(List.of(
-                                                        "itemName^4",
-                                                        "itemDesc^2",
-                                                        "upcCode^3",
-                                                        "commodity^1",
-                                                        "division^1"
-                                                ))
-                                                .query(searchString)
-                                                .type(TextQueryType.PhrasePrefix)  // prefix matching
-                                        ))
+                                    // 2. PHRASE PREFIX — text fields only
+                                    b.should(s2 -> s2.multiMatch(m -> m
+                                            .fields(List.of(
+                                                    "itemName^4",   // text field - safe
+                                                    "itemDesc^2"    // text field - safe
+                                            ))
+                                            .query(searchString)
+                                            .type(TextQueryType.PhrasePrefix)
+                                    ));
 
-                                        // 3. WILDCARD on keyword — catches remaining edge cases
-                                        // "*cook*" matches anything containing "cook"
-                                        .should(s3 -> s3.wildcard(w -> w
-                                                .field("itemName.keyword")
-                                                .value("*" + searchString.toLowerCase() + "*")
+                                    // 3. WILDCARD on itemName.keyword
+                                    b.should(s3 -> s3.wildcard(w -> w
+                                            .field("itemName.keyword")
+                                            .value("*" + searchString.toLowerCase() + "*")
+                                            .caseInsensitive(true)
+                                    ));
+
+                                    // 4. WILDCARD on upcCode.keyword (keyword - no fuzziness)
+                                    b.should(s4 -> s4.wildcard(w -> w
+                                            .field("upcCode.keyword")
+                                            .value("*" + searchString + "*")
+                                            .caseInsensitive(true)
+                                    ));
+
+                                    // 5. WILDCARD on upc.keyword
+                                    b.should(s5 -> s5.wildcard(w -> w
+                                            .field("upc.keyword")
+                                            .value("*" + searchString + "*")
+                                            .caseInsensitive(true)
+                                    ));
+
+                                    // 6. TERM on itemId — only if input is numeric
+                                    // 6. TERM + WILDCARD on itemId — only if input is numeric
+                                    if (isNumeric) {
+                                        // exact match as long
+                                        b.should(s6 -> s6.term(t -> t
+                                                .field("itemId")
+                                                .value(v -> v.longValue(Long.parseLong(searchString)))
+                                        ));
+
+                                        // exact match as string (in case itemId is stored as keyword)
+                                        b.should(s7 -> s7.term(t -> t
+                                                .field("itemId")
+                                                .value(v -> v.stringValue(searchString))
+                                        ));
+
+                                        // wildcard match on itemId.keyword (partial numeric search)
+                                        b.should(s8 -> s8.wildcard(w -> w
+                                                .field("itemId.keyword")
+                                                .value("*" + searchString + "*")
                                                 .caseInsensitive(true)
-                                        ))
-                                        .should(s4 -> s4.wildcard(w -> w
-                                                .field("upcCode.keyword")
-                                                .value("*" + searchString.toLowerCase() + "*")
-                                                .caseInsensitive(true)
-                                        ))
-                                )
+                                        ));
+                                    }
+
+                                    return b;
+                                })
                         )
-                        .size(50),   // limit results
+                        .size(50),
                 ItemWithStoreIds.class
         );
 

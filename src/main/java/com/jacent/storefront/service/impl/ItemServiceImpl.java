@@ -85,10 +85,11 @@ public class ItemServiceImpl implements ItemService {
         if(enableFullTextOpenSearch && !StringUtils.isEmpty(searchKeyword)){
             List<ItemWithStoreIds> itemWithStoreIds = openSearchService.searchItems(searchKeyword.trim());
             return itemWithStoreIds.stream()
-                    .filter(item -> item.getStoreIds().contains(user.getStoreId()))
-                    .map(item -> {
-                        return (Item) item;
-                    }).toList();
+                    .filter(item -> item.getStoreIds() != null
+                            && item.getStoreIds().contains(user.getStoreId()))
+                    .peek(item -> item.setStoreIds(null))  // clear storeIds before returning
+                    .map(item -> (Item) item)
+                    .toList();
         } else {
             // Search from DB
             String escapedKeyword = escapeSearchKeyword(searchKeyword.trim()).toLowerCase();
@@ -107,7 +108,7 @@ public class ItemServiceImpl implements ItemService {
             }
             log.info("OpenSearch is healthy. Starting to rebuild index for items.");
             int pageNo = 0;
-            int pageSize = 1000;
+            int pageSize = 5000;
             while (true){
                 try {
                     List<ItemWithStoreIds> itemList = itemRepository.getAllItemsWithStoreIdsAndPagination(pageNo, pageSize);
@@ -115,10 +116,13 @@ public class ItemServiceImpl implements ItemService {
                         log.info("No more records. Batch processing completed.");
                         break;
                     }
+                    log.info("START: Bulk index products pageNo: {}", pageNo);
                     openSearchService.bulkIndexProducts(itemList);
+                    log.info("END: Bulk index products pageNo: {}", pageNo);
                     pageNo++;
                 } catch (Exception e){
                     log.error("Error occured while bulkIndexProducts. Error {}", e);
+                    break;
                 }
             }
         } catch (Exception e){

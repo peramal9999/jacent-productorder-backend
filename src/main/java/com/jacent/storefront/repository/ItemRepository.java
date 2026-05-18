@@ -229,8 +229,6 @@ public class ItemRepository {
                         item.setPrice(rs.getBigDecimal("PRICE"));
                         item.setRetailPrice(rs.getBigDecimal("RETAIL_PRICE"));
                         item.setUpcCode(rs.getString("UPC_CODE"));
-                        item.setDivision(rs.getString("DIVISION"));
-                        item.setCommodity(rs.getString("COMMODITY"));
                         String storeIdsStr = rs.getString("STORE_IDS");
 
                         List<Integer> storeIds;
